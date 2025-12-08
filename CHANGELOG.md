@@ -14,6 +14,7 @@
 - [BUGFIX] Escape percentage signs in `DATABASE_URI` for Alembic when using the SQLAlchemy URL configuration to prevent formatting errors during migrations
 - [UI] Enhance service configuration handling during edits and renames to ensure consistency and prevent data loss
 - [UI] Enhance session management with Redis support and configurable session lifetime
+- [LINUX] Support Fedora 43
 - [DOCS] Add documentation about the new logging settings and how to configure them
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
