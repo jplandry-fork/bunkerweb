@@ -16,6 +16,7 @@
 - [UI] Enhance session management with Redis support and configurable session lifetime
 - [LINUX] Support Fedora 43
 - [DOCS] Add documentation about the new logging settings and how to configure them
+- [DOCS] Update database compatibility matrix
 - [DEPS] Update lua-resty-session version to v4.1.5
 - [DEPS] Update coreruleset-v4 version to v4.21.0
 
