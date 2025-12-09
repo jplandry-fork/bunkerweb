@@ -58,7 +58,6 @@ services:
       - bunkerweb
     volumes:
       - bw-storage:/data
-      - ./configs/server-http/hello.conf:/data/configs/server-http/hello.conf:ro
     environment:
       <<: *env
       BUNKERWEB_INSTANCES: ""
@@ -77,8 +76,6 @@ services:
       USE_CLIENT_CACHE: "yes"
       USE_GZIP: "yes"
       SESSIONS_CHECK_IP: "no"
-      EXTERNAL_PLUGIN_URLS: "https://github.com/bunkerity/bunkerweb-plugins/archive/refs/heads/dev.zip"
-      CUSTOM_CONF_MODSEC_CRS_reqbody-suppress: "SecRuleRemoveById 200002"
     restart: "unless-stopped"
     networks:
       bw-universe:
@@ -125,7 +122,36 @@ services:
       - "bunkerweb.USE_REVERSE_PROXY=yes"
       - "bunkerweb.REVERSE_PROXY_URL=/admin"
       - "bunkerweb.REVERSE_PROXY_HOST=http://bw-ui:7000"
-      - bunkerweb.CUSTOM_CONF_MODSEC_CRS_ip-host=SecRuleRemoveById 920350
+
+  bw-api:
+    build:
+      context: ../..
+      dockerfile: ./src/api/Dockerfile
+    ports:
+      - 8888:8888
+    volumes:
+      - ../../src/api/app:/usr/share/bunkerweb/api/app:ro
+      - ../../src/api/utils:/usr/share/bunkerweb/api/utils:ro
+    environment:
+      <<: *env
+      API_USERNAME: "admin"
+      API_PASSWORD: "P@ssw0rd"
+      DEBUG: "1"
+    restart: "unless-stopped"
+    networks:
+      bw-universe:
+        aliases:
+          - bw-api
+      bw-db:
+        aliases:
+          - bw-api
+    labels:
+      - "bunkerweb.SERVER_NAME=api.example.com"
+      - "bunkerweb.USE_TEMPLATE=api"
+      - "bunkerweb.GENERATE_SELF_SIGNED_SSL=yes"
+      - "bunkerweb.USE_REVERSE_PROXY=yes"
+      - "bunkerweb.REVERSE_PROXY_URL=/"
+      - "bunkerweb.REVERSE_PROXY_HOST=http://bw-api:8888"
 
   bw-db:
     image: mariadb:11
