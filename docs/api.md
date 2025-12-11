@@ -208,32 +208,38 @@ Choose the flavor that matches your environment.
 
 ## Rate limiting
 
-Enabled by default with `API_RATE_LIMIT_TIMES` per `API_RATE_LIMIT_SECONDS` and a dedicated `/auth` limit (`API_RATE_LIMIT_AUTH_TIMES` per `API_RATE_LIMIT_AUTH_SECONDS`). Limits are enforced with SlowAPI and headers are injected when enabled. Configure via:
+Enabled by default with two strings: `API_RATE_LIMIT` (global, default `100r/m`) and `API_RATE_LIMIT_AUTH` (default `10r/m` or `off`). Rates accept NGINX-style notation (`3r/s`, `40r/m`, `200r/h`) or verbose forms (`100/minute`, `200 per 30 minutes`). Configure via:
 
+- `API_RATE_LIMIT`, `API_RATE_LIMIT_AUTH`
 - `API_RATE_LIMIT_ENABLED`, `API_RATE_LIMIT_HEADERS_ENABLED`
-- `API_RATE_LIMIT_RULES` (CSV/JSON/YAML string or file path) and `API_RATE_LIMIT_DEFAULTS`
-- `API_RATE_LIMIT_APPLICATION_LIMITS`, `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`
-- `API_RATE_LIMIT_EXEMPT_IPS` (space/comma-separated CIDRs)
+- `API_RATE_LIMIT_RULES` (CSV/JSON/YAML string or file path)
+- `API_RATE_LIMIT_STRATEGY`, `API_RATE_LIMIT_KEY`, `API_RATE_LIMIT_EXEMPT_IPS`
 - Storage is in-memory or Redis/Valkey when `USE_REDIS=yes` plus `REDIS_*` settings (Sentinel supported).
+
+Limiter strategies (powered by `limits`):
+
+- `fixed-window` (default): bucket resets at each interval boundary; cheapest and fine for coarse limits.
+- `moving-window`: true rolling window using precise timestamps; smoother but heavier on storage operations.
+- `sliding-window-counter`: hybrid that smooths with weighted counts from the previous window; lighter than moving but smoother than fixed.
+
+More detail and trade-offs: [https://limits.readthedocs.io/en/stable/strategies.html](https://limits.readthedocs.io/en/stable/strategies.html)
 
 ??? example "Inline CSV"
     ```
-    API_RATE_LIMIT_RULES='POST /auth 10/60, GET /instances* 200/60, POST|PATCH /services* 40/60'
+    API_RATE_LIMIT_RULES='POST /auth 10r/m, GET /instances* 200r/m, POST|PATCH /services* 40r/m'
     ```
 
 ??? example "YAML file"
     ```yaml
-    API_RATE_LIMIT_ENABLED: yes
-    API_RATE_LIMIT_DEFAULTS: ["200/minute"]
+    API_RATE_LIMIT: 200r/m
+    API_RATE_LIMIT_AUTH: 15r/m
     API_RATE_LIMIT_RULES:
       - path: "/auth"
         methods: "POST"
-        times: 10
-        seconds: 60
+        rate: "10r/m"
       - path: "/instances*"
         methods: "GET|POST"
-        times: 100
-        seconds: 60
+        rate: "100r/m"
     ```
 
 ## Configuration sources and precedence
@@ -277,18 +283,17 @@ Disable docs or schema by setting their URLs to `off|disabled|none|false|0`. Set
 
 #### Rate limiting
 
-| Setting                                                        | Description                                 | Accepted values                                           | Default        |
-| -------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------- | -------------- |
-| `API_RATE_LIMIT_ENABLED`                                       | Enable limiter                              | `yes/no/on/off/true/false/0/1`                            | `yes`          |
-| `API_RATE_LIMIT_HEADERS_ENABLED`                               | Inject rate limit headers                   | same as above                                             | `yes`          |
-| `API_RATE_LIMIT_TIMES`, `API_RATE_LIMIT_SECONDS`               | Global limit (times per window)             | Integers                                                  | `100`, `60`    |
-| `API_RATE_LIMIT_AUTH_TIMES`, `API_RATE_LIMIT_AUTH_SECONDS`     | `/auth` limit                               | Integers                                                  | `10`, `60`     |
-| `API_RATE_LIMIT_RULES`                                         | Per-path rules (CSV/JSON/YAML or file path) | String or path                                            | unset          |
-| `API_RATE_LIMIT_DEFAULTS`, `API_RATE_LIMIT_APPLICATION_LIMITS` | Additional default rules                    | String or list                                            | unset          |
-| `API_RATE_LIMIT_STRATEGY`                                      | Algorithm                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
-| `API_RATE_LIMIT_KEY`                                           | Key selector                                | `ip`, `user`, `path`, `method`, `header:<Name>`           | `ip`           |
-| `API_RATE_LIMIT_EXEMPT_IPS`                                    | Skip limits for these IPs/CIDRs             | Space/comma-separated                                     | unset          |
-| `API_RATE_LIMIT_STORAGE_OPTIONS`                               | JSON merged into storage config             | JSON string                                               | unset          |
+| Setting                          | Description                                 | Accepted values                                           | Default        |
+| -------------------------------- | ------------------------------------------- | --------------------------------------------------------- | -------------- |
+| `API_RATE_LIMIT`                 | Global limit (NGINX-style string)           | `3r/s`, `100/minute`, `500 per 30 minutes`                | `100r/m`       |
+| `API_RATE_LIMIT_AUTH`            | `/auth` limit (or `off`)                    | same as above or `off/disabled/none/false/0`              | `10r/m`        |
+| `API_RATE_LIMIT_ENABLED`         | Enable limiter                              | `yes/no/on/off/true/false/0/1`                            | `yes`          |
+| `API_RATE_LIMIT_HEADERS_ENABLED` | Inject rate limit headers                   | same as above                                             | `yes`          |
+| `API_RATE_LIMIT_RULES`           | Per-path rules (CSV/JSON/YAML or file path) | String or path                                            | unset          |
+| `API_RATE_LIMIT_STRATEGY`        | Algorithm                                   | `fixed-window`, `moving-window`, `sliding-window-counter` | `fixed-window` |
+| `API_RATE_LIMIT_KEY`             | Key selector                                | `ip`, `header:<Name>`                                     | `ip`           |
+| `API_RATE_LIMIT_EXEMPT_IPS`      | Skip limits for these IPs/CIDRs             | Space/comma-separated                                     | unset          |
+| `API_RATE_LIMIT_STORAGE_OPTIONS` | JSON merged into storage config             | JSON string                                               | unset          |
 
 #### Redis/Valkey (for rate limits)
 
