@@ -1964,15 +1964,17 @@ class Database:
                     "service_id": service_id,
                 }
 
-                custom_conf = (
-                    session.query(Custom_configs)
-                    .with_entities(Custom_configs.checksum, Custom_configs.method, Custom_configs.is_draft)
-                    .filter_by(**filters)
-                    .first()
-                )
+                custom_conf = session.query(Custom_configs).filter_by(**filters).first()
 
                 if not custom_conf:
                     to_put.append(Custom_configs(**custom_config))
+                elif method == "manual" and custom_conf.method in {"manual", "ui", "api"}:
+                    should_update_data = custom_config["checksum"] != custom_conf.checksum
+                    if should_update_data:
+                        custom_conf.data = custom_config["data"]
+                        custom_conf.checksum = custom_config["checksum"]
+                    if custom_conf.is_draft != custom_config["is_draft"] or should_update_data:
+                        custom_conf.is_draft = custom_config["is_draft"]
                 elif self._methods_are_compatible(method, custom_conf.method):
                     should_update_data = custom_config["checksum"] != custom_conf.checksum
                     if should_update_data:
