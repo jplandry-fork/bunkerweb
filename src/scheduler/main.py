@@ -170,6 +170,9 @@ def handle_reload(signum, frame):
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
 
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
                     cmd_env[key] = value
@@ -443,6 +446,17 @@ def generate_caches():
 
 
 def generate_configs(logger: Logger = LOGGER) -> bool:
+    cmd_env = {
+        "PATH": getenv("PATH", ""),
+        "PYTHONPATH": getenv("PYTHONPATH", ""),
+        "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
+        "LOG_LEVEL": getenv("LOG_LEVEL", ""),
+        "DATABASE_URI": getenv("DATABASE_URI", ""),
+    }
+
+    if getenv("TZ"):
+        cmd_env["TZ"] = getenv("TZ")
+
     # run the generator
     proc = subprocess_run(
         [
@@ -457,13 +471,7 @@ def generate_configs(logger: Logger = LOGGER) -> bool:
         stdin=DEVNULL,
         stderr=STDOUT,
         check=False,
-        env={
-            "PATH": getenv("PATH", ""),
-            "PYTHONPATH": getenv("PYTHONPATH", ""),
-            "CUSTOM_LOG_LEVEL": getenv("CUSTOM_LOG_LEVEL", ""),
-            "LOG_LEVEL": getenv("LOG_LEVEL", ""),
-            "DATABASE_URI": getenv("DATABASE_URI", ""),
-        },
+        env=cmd_env,
     )
 
     if proc.returncode != 0:
@@ -701,6 +709,9 @@ if __name__ == "__main__":
                 "DATABASE_URI": getenv("DATABASE_URI", ""),
             }
 
+            if getenv("TZ"):
+                cmd_env["TZ"] = getenv("TZ")
+
             for key, value in environ.items():
                 if "CUSTOM_CONF" in key:
                     cmd_env[key] = value
@@ -908,6 +919,9 @@ if __name__ == "__main__":
                     "LOG_LEVEL": getenv("LOG_LEVEL", ""),
                     "DATABASE_URI": getenv("DATABASE_URI", ""),
                 }
+
+                if getenv("TZ"):
+                    cmd_env["TZ"] = getenv("TZ")
 
                 for key, value in environ.items():
                     if "CUSTOM_CONF" in key:
