@@ -2294,11 +2294,22 @@ sudo ./install-bunkerweb.sh --yes --api
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora 已经提供了我们支持的 NGINX 1.28.0
+    Fedora 已经提供了我们支持的 NGINX。请在下方选择您的 Fedora 版本以安装正确的 NGINX 包：
 
-    ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.0
-    ```
+    === "Fedora 41"
+
+        ```shell
+        sudo dnf install -y --allowerasing nginx-1.28.0
+        ```
+
+    === "Fedora 42 / 43"
+
+        !!! warning "NGINX 1.28.0 不再可用"
+            Fedora 42 和 43 已从其镜像中移除 NGINX 1.28.0。您必须改为安装 NGINX 1.28.1。
+
+        ```shell
+        sudo dnf install -y --allowerasing nginx-1.28.1
+        ```
 
     !!! example "禁用设置向导"
         如果您不希望在安装 BunkerWeb 时使用 Web UI 的设置向导，请导出以下变量：

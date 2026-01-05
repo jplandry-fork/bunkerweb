@@ -224,7 +224,7 @@ fi
 # Set CFALGS
 export CFLAGS="$CFLAGS -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=1"
 
-if [ "$OS" = "fedora" ] ; then
+if [[ "$OS" = "fedora" && "$OS_VERSION" != "41" ]] ; then
 	export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx-1.28.1"
 else
 	export CHANGE_DIR="/tmp/bunkerweb/deps/src/nginx"

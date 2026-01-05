@@ -2295,11 +2295,22 @@ Asegúrate de tener **NGINX 1.28.0 instalado antes de instalar BunkerWeb**. Para
         sudo dnf config-manager setopt updates-testing.enabled=1
         ```
 
-    Fedora ya proporciona NGINX 1.28.0 que nosotros soportamos
+    Fedora ya proporciona NGINX que nosotros soportamos. Elige tu versión de Fedora a continuación para instalar el paquete NGINX correcto:
 
-    ```shell
-    sudo dnf install -y --allowerasing nginx-1.28.0
-    ```
+    === "Fedora 41"
+
+        ```shell
+        sudo dnf install -y --allowerasing nginx-1.28.0
+        ```
+
+    === "Fedora 42 / 43"
+
+        !!! warning "NGINX 1.28.0 ya no está disponible"
+            Fedora 42 y 43 han eliminado NGINX 1.28.0 de sus mirrors. Debes instalar NGINX 1.28.1 en su lugar.
+
+        ```shell
+        sudo dnf install -y --allowerasing nginx-1.28.1
+        ```
 
     !!! example "Deshabilitar el asistente de configuración"
         Si no quieres usar el asistente de configuración de la interfaz de usuario web cuando se instale BunkerWeb, exporta la siguiente variable:
