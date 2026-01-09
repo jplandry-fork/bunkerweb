@@ -11,7 +11,7 @@
 - [DEPS] Updated Modsecurity nginx connector version to 1.0.4
 - [DEPS] Updated NGINX version to v1.28.1 for all integrations
 
-## v1.6.7~rc2 - 2026/01/??
+## v1.6.7~rc2 - 2026/01/07
 
 - [BUGFIX] Fix wrong certificate name checks in Let's Encrypt
 - [BUGFIX] Fix issues with Let's Encrypt's HTTP challenge on Linux HA integrations
