@@ -15,6 +15,7 @@ acme==5.2.2 \
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
     #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
     #   certbot-dns-dynu
     #   certbot-dns-gehirn
     #   certbot-dns-google
@@ -39,13 +40,13 @@ beautifulsoup4==4.14.3 \
     --hash=sha256:0918bfe44902e6ad8d57732ba310582e98da931428d231a5ecb9e7c703a735bb \
     --hash=sha256:6292b1c5186d356bba669ef9f7f051757099565ad9ada5dd630bd9de5fa7fb86
     # via dns-lexicon
-boto3==1.42.26 \
-    --hash=sha256:0fbcf1922e62d180f3644bc1139425821b38d93c1e6ec27409325d2ae86131aa \
-    --hash=sha256:f116cfbe7408e0a9153da363f134d2f1b5008f17ee86af104f0ce59a62be1833
+boto3==1.42.27 \
+    --hash=sha256:39dfec51aff3f9356e8c7331195f324cb498ec75b2601a902fc62aa127b8fd00 \
+    --hash=sha256:a8a53abb98ff1a24d9a88d9d8c0285bf02d23189666130456e8951ede2f7db98
     # via certbot-dns-route53
-botocore==1.42.26 \
-    --hash=sha256:1c8855e3e811f015d930ccfe8751d4be295aae0562133d14b6f0b247cd6fd8d3 \
-    --hash=sha256:71171c2d09ac07739f4efce398b15a4a8bc8769c17fb3bc99625e43ed11ad8b7
+botocore==1.42.27 \
+    --hash=sha256:c8e1e3ffb6c871622b1c8054f064d60cbc786aa5ca1f97f5f9fd5fa0a9d82d05 \
+    --hash=sha256:d51fb3b8dd1a944c8d238d2827a0dd6e5528d6da49a3bd9eccad019c533e4c9c
     # via
     #   boto3
     #   s3transfer
@@ -61,6 +62,7 @@ certbot==5.2.2 \
     #   certbot-dns-dnsimple
     #   certbot-dns-dnsmadeeasy
     #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
     #   certbot-dns-gehirn
@@ -105,6 +107,10 @@ certbot-dns-dnsmadeeasy==5.2.2 \
 certbot-dns-domainoffensive==2.0.0 \
     --hash=sha256:bfe7cb33eee6bc48e62437c811d0605cf974f723e211ac27fc396615ff5a2a05 \
     --hash=sha256:e2da1d4f9bd46456578c15f3a30ac4f767871a7a671c6c0d25efd6502670b0ff
+    # via -r requirements.in
+certbot-dns-domeneshop==0.2.9 \
+    --hash=sha256:9e65048c3a58ee52cbbca5af85944ff736727c43677941aaee0a0ffb9da84f30 \
+    --hash=sha256:a3bb383620017db55b2eb47c224364a4cbaf82c1a890d2545e86f267aef0b8f2
     # via -r requirements.in
 certbot-dns-duckdns==1.7.1 \
     --hash=sha256:223ab65600cbdd8b968b0559e45d315fe710912a863dfdcdc55d1fca7975eed7 \
@@ -176,7 +182,9 @@ certbot-dns-scaleway==0.0.7 \
 certifi==2026.1.4 \
     --hash=sha256:9943707519e4add1115f44c2bc244f782c0249876bf51b6599fee1ffbedd685c \
     --hash=sha256:ac726dd470482006e014ad384921ed6438c457018f4b3d204aea4281258b2120
-    # via requests
+    # via
+    #   domeneshop
+    #   requests
 cffi==2.0.0 \
     --hash=sha256:00bdf7acc5f795150faa6957054fbbca2439db2f775ce831222b66f192f03beb \
     --hash=sha256:07b271772c100085dd28b74fa0cd81c8fb1a3ba18b21e03d7c27f3436a10606b \
@@ -482,6 +490,10 @@ dnspython==2.8.0 \
     #   certbot-dns-dynu
     #   certbot-dns-rfc2136
     #   dns-lexicon
+domeneshop==0.4.4 \
+    --hash=sha256:502c480e7848024c59d68417611c8031d1a052c519e809585f0b312f8f531408 \
+    --hash=sha256:60845dd023896f82fc6edd3e4bd1542b37121116a5e44fe28526f6f0af5a8cf3
+    # via certbot-dns-domeneshop
 filelock==3.20.3 \
     --hash=sha256:18c57ee915c7ec61cff0ecf7f0f869936c7c30191bb0cf406f1341778d0834e1 \
     --hash=sha256:4b0dda527ee31078689fc205ec4f1c1bf7d56cf88b6dc9426c4f230e46c2dce1
@@ -490,9 +502,9 @@ google-api-core==2.29.0 \
     --hash=sha256:84181be0f8e6b04006df75ddfe728f24489f0af57c96a529ff7cf45bc28797f7 \
     --hash=sha256:d30bc60980daa36e314b5d5a3e5958b0200cb44ca8fa1be2b614e932b75a3ea9
     # via google-api-python-client
-google-api-python-client==2.187.0 \
-    --hash=sha256:d8d0f6d85d7d1d10bdab32e642312ed572bdc98919f72f831b44b9a9cebba32f \
-    --hash=sha256:e98e8e8f49e1b5048c2f8276473d6485febc76c9c47892a8b4d1afa2c9ec8278
+google-api-python-client==2.188.0 \
+    --hash=sha256:3cad1b68f9d48b82b93d77927e8370a6f43f33d97848242601f14a93a1c70ef5 \
+    --hash=sha256:5c469db6614f071009e3e5bb8b6aeeccae3beb3647fa9c6cd97f0d551edde0b6
     # via certbot-dns-google
 google-auth==2.47.0 \
     --hash=sha256:833229070a9dfee1a353ae9877dcd2dec069a8281a4e72e72f77d4a70ff945da \
@@ -914,6 +926,7 @@ requests==2.32.5 \
     #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
     #   certbot-dns-duckdns
     #   certbot-dns-dynu
     #   certbot-dns-infomaniak
@@ -948,7 +961,9 @@ s3transfer==0.16.0 \
 schedule==1.2.2 \
     --hash=sha256:15fe9c75fe5fd9b9627f3f19cc0ef1420508f9f9a46f45cd0769ef75ede5f0b7 \
     --hash=sha256:5bef4a2a0183abf44046ae0d164cadcac21b1db011bdd8102e4a0c1e91e06a7d
-    # via certbot-dns-domainoffensive
+    # via
+    #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
 
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==80.9.0 \
@@ -990,6 +1005,7 @@ urllib3==2.3.0 \
     # via
     #   -r requirements.in
     #   botocore
+    #   domeneshop
     #   requests
 zipp==3.23.0 \
     --hash=sha256:071652d6115ed432f5ce1d34c336c0adfd6a884660d1e9712a256d3d3bd4b14e \
@@ -1031,5 +1047,6 @@ zope-interface==8.2 \
     #   certbot-dns-bunny
     #   certbot-dns-desec
     #   certbot-dns-domainoffensive
+    #   certbot-dns-domeneshop
     #   certbot-dns-ionos
     #   certbot-dns-scaleway

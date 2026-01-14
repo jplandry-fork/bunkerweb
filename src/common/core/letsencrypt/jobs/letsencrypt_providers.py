@@ -149,6 +149,25 @@ class DomainOffensiveProvider(Provider):
         return ["--authenticator", "dns-domainoffensive"]
 
 
+class DomeneshopProvider(Provider):
+    """Domeneshop DNS provider."""
+
+    dns_domeneshop_token: str
+    dns_domeneshop_secret: str
+
+    _validate_aliases = alias_model_validator(
+        {
+            "dns_domeneshop_token": ("dns_domeneshop_token", "domeneshop_token", "token"),
+            "dns_domeneshop_secret": ("dns_domeneshop_secret", "domeneshop_secret", "secret"),
+        }
+    )
+
+    @staticmethod
+    def get_extra_args() -> dict:
+        """Return additional arguments for the provider."""
+        return ["--authenticator", "dns-domeneshop"]
+
+
 class DnsimpleProvider(Provider):
     """DNSimple DNS provider."""
 
