@@ -55,7 +55,7 @@ class Plugins(Base):
     stream = Column(STREAM_TYPES_ENUM, default="no", nullable=False)
     type = Column(PLUGIN_TYPES_ENUM, default="core", nullable=False)
     method = Column(METHODS_ENUM, default="manual", nullable=False)
-    data = Column(LargeBinary, default=None, nullable=True)
+    data = Column(LargeBinary(length=(2**32) - 1), default=None, nullable=True)
     checksum = Column(String(128), default=None, nullable=True)
     config_changed = Column(Boolean, default=False, nullable=True)
     last_config_change = Column(DateTime(timezone=True), nullable=True)
@@ -185,7 +185,7 @@ class Plugin_pages(Base):
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)
     plugin_id = Column(String(64), ForeignKey("bw_plugins.id", onupdate="cascade", ondelete="cascade"), unique=True, nullable=False)
-    data = Column(LargeBinary, nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
 
     plugin = relationship("Plugins", back_populates="pages")
@@ -198,7 +198,7 @@ class Jobs_cache(Base):
     job_name = Column(String(128), ForeignKey("bw_jobs.name", onupdate="cascade", ondelete="cascade"), nullable=False)
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     file_name = Column(String(256), nullable=False)
-    data = Column(LargeBinary, nullable=True)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=True)
     last_update = Column(DateTime(timezone=True), nullable=True)
     checksum = Column(String(128), nullable=True)
 
@@ -226,7 +226,7 @@ class Custom_configs(Base):
     service_id = Column(String(256), ForeignKey("bw_services.id", onupdate="cascade", ondelete="cascade"), nullable=True)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
-    data = Column(LargeBinary, nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     method = Column(METHODS_ENUM, nullable=False)
     is_draft = Column(Boolean, nullable=False, default=False, server_default="0")
@@ -320,7 +320,7 @@ class Template_custom_configs(Base):
     step_id = Column(Integer, nullable=False)
     type = Column(CUSTOM_CONFIGS_TYPES_ENUM, nullable=False)
     name = Column(String(256), nullable=False)
-    data = Column(LargeBinary, nullable=False)
+    data = Column(LargeBinary(length=(2**32) - 1), nullable=False)
     checksum = Column(String(128), nullable=False)
     order = Column(Integer, default=0, nullable=False)
 
