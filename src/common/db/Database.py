@@ -1037,7 +1037,7 @@ class Database:
             # Plugins to delete
             for pid in old_plugin_ids - new_plugin_ids:
                 old_p = old_plugins[pid]
-                if old_p.type == "core":
+                if old_p.method == "manual":
                     self.logger.warning(f'{old_p.type.title()} plugin "{pid}" has been removed, deleting it')
                     to_delete.append({"type": "plugin", "filter": {"id": pid}})
 
