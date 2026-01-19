@@ -2621,27 +2621,37 @@ class Database:
         """Get the services from the database"""
         services = []
         with self._db_session() as session:
-            db_services = (
-                session.query(Services).with_entities(Services.id, Services.method, Services.is_draft, Services.creation_date, Services.last_update).all()
+            # Fetch all services with their USE_TEMPLATE setting in a single optimized query
+            # This avoids N+1 query problem when loading many services
+            query = (
+                session.query(Services)
+                .outerjoin(Services_settings, (Services.id == Services_settings.service_id) & (Services_settings.setting_id == "USE_TEMPLATE"))
+                .with_entities(
+                    Services.id,
+                    Services.method,
+                    Services.is_draft,
+                    Services.creation_date,
+                    Services.last_update,
+                    Services_settings.value.label("template"),
+                )
             )
 
+            if not with_drafts:
+                query = query.filter(Services.is_draft == False)  # noqa: E712
+
+            db_services = query.all()
+
         for service in db_services:
-            if with_drafts or not service.is_draft:
-                service_settings = self.get_non_default_settings(
-                    with_drafts=with_drafts,
-                    filtered_settings=("USE_TEMPLATE",),
-                    service=service.id,
-                )
-                services.append(
-                    {
-                        "id": service.id,
-                        "method": service.method,
-                        "is_draft": service.is_draft,
-                        "creation_date": service.creation_date,
-                        "last_update": service.last_update,
-                        "template": service_settings.get("USE_TEMPLATE", ""),
-                    }
-                )
+            services.append(
+                {
+                    "id": service.id,
+                    "method": service.method,
+                    "is_draft": service.is_draft,
+                    "creation_date": service.creation_date,
+                    "last_update": service.last_update,
+                    "template": service.template or "",
+                }
+            )
 
         return services
 

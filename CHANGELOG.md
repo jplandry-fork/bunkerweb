@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.8~rc2 - 2026/01/??
+
+- [FEATURE] Enhance `Let's Encrypt` plugin to support concurrent certificate generation for multiple services via the new `LETS_ENCRYPT_CONCURRENT_REQUESTS` setting (default: `no`), improving efficiency and reducing wait times during bulk operations
+- [DEPS] Updated lua-cjson version to v2.1.0.16
+
 ## v1.6.8~rc1 - 2026/01/??
 
 - [FEATURE] Refactor Templator engine to use Jinja2 for improved templating capabilities and maintainability
