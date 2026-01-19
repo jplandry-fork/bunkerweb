@@ -1999,7 +1999,7 @@ El script de instalación fácil es una herramienta poderosa diseñada para simp
 
 1.  **Análisis del sistema**: Detecta tu sistema operativo y lo verifica contra la lista de distribuciones compatibles.
 2.  **Personalización de la instalación**: En modo interactivo, te pide que elijas un tipo de instalación (Todo en uno, Gestor, Trabajador, etc.) y decidas si habilitar el asistente de configuración basado en la web.
-3.  **Integraciones opcionales**: Ofrece instalar y configurar automáticamente el [Motor de Seguridad CrowdSec](#crowdsec-integration-with-the-script).
+3.  **Integraciones opcionales**: Ofrece instalar y configurar automáticamente el [Motor de Seguridad CrowdSec](#crowdsec-integration-with-the-script) y Redis/Valkey para caché y sesiones compartidas.
 4.  **Gestión de dependencias**: Instala la versión correcta de NGINX requerida por BunkerWeb desde fuentes oficiales y bloquea la versión para evitar actualizaciones no deseadas.
 5.  **Instalación de BunkerWeb**: Añade el repositorio de paquetes de BunkerWeb, instala los paquetes necesarios y bloquea la versión.
 6.  **Configuración del servicio**: Configura y habilita los servicios `systemd` correspondientes a tu tipo de instalación elegido.
@@ -2019,9 +2019,10 @@ Cuando se ejecuta sin ninguna opción, el script entra en un modo interactivo qu
 2.  **Asistente de configuración**: Elige si habilitar el asistente de configuración basado en la web. Esto es muy recomendable para los usuarios primerizos.
 3.  **Integración con CrowdSec**: Opta por instalar el motor de seguridad CrowdSec para una protección avanzada contra amenazas en tiempo real. Disponible solo para instalaciones de Pila completa.
 4.  **CrowdSec AppSec**: Si eliges instalar CrowdSec, también puedes habilitar el componente de Seguridad de Aplicaciones (AppSec), que añade capacidades de WAF.
-5.  **Resolvers DNS**: Para instalaciones de Pila completa, Gestor y Trabajador, puede especificar opcionalmente IPs de resolvers DNS personalizados.
-6.  **API interna HTTPS**: Para instalaciones de Pila completa, Gestor y Trabajador, elija si habilitar HTTPS para la comunicación API interna entre el programador/gestor y las instancias BunkerWeb/trabajador (predeterminado: solo HTTP).
-7.  **Servicio de API**: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.
+5.  **Redis/Valkey**: Activa Redis/Valkey para compartir sesiones, métricas y datos de seguridad entre nodos (clustering y balanceo). Instalación local o servidor existente. Disponible solo para Pila completa y Gestor.
+6.  **Resolvers DNS**: Para instalaciones de Pila completa, Gestor y Trabajador, puede especificar opcionalmente IPs de resolvers DNS personalizados.
+7.  **API interna HTTPS**: Para instalaciones de Pila completa, Gestor y Trabajador, elija si habilitar HTTPS para la comunicación API interna entre el programador/gestor y las instancias BunkerWeb/trabajador (predeterminado: solo HTTP).
+8.  **Servicio de API**: Para instalaciones de Pila completa y Gestor, elige si habilitar el servicio API externo opcional. Está deshabilitado por defecto en las instalaciones de Linux.
 
 !!! info "Instalaciones de Gestor y Programador"
     Si eliges el tipo de instalación **Gestor** o **Solo Programador**, también se te pedirá que proporciones las direcciones IP o los nombres de host de tus instancias de trabajador de BunkerWeb.
@@ -2063,6 +2064,8 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 | `--crowdsec`        | Instala y configura el motor de seguridad CrowdSec.                     |
 | `--no-crowdsec`     | Omite la instalación de CrowdSec.                                       |
 | `--crowdsec-appsec` | Instala CrowdSec con el componente AppSec (incluye capacidades de WAF). |
+| `--redis`           | Instala y configura Redis localmente.                                   |
+| `--no-redis`        | Omite la integración de Redis.                                          |
 
 **Opciones avanzadas:**
 
@@ -2074,6 +2077,15 @@ Para configuraciones no interactivas o automatizadas, el script se puede control
 | `--api-https`               | Habilitar HTTPS para la comunicación API interna (predeterminado: solo HTTP).                         |
 | `--backup-dir PATH`         | Directorio para almacenar la copia de seguridad automática antes de la actualización.                 |
 | `--no-auto-backup`          | Omitir copia de seguridad automática (DEBE haberla hecho manualmente).                                |
+| `--redis-host HOST`         | Host Redis para un servidor Redis/Valkey existente.                                                   |
+| `--redis-port PORT`         | Puerto Redis para un servidor Redis/Valkey existente.                                                 |
+| `--redis-database DB`       | Número de base de datos Redis.                                                                        |
+| `--redis-username USER`     | Usuario Redis (Redis 6+).                                                                             |
+| `--redis-password PASS`     | Contraseña Redis.                                                                                     |
+| `--redis-ssl`               | Habilitar SSL/TLS para la conexión Redis.                                                             |
+| `--redis-no-ssl`            | Deshabilitar SSL/TLS para la conexión Redis.                                                          |
+| `--redis-ssl-verify`        | Verificar el certificado SSL de Redis.                                                                |
+| `--redis-no-ssl-verify`     | No verificar el certificado SSL de Redis.                                                             |
 
 **Ejemplo de uso:**
 
@@ -2102,6 +2114,9 @@ sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-htt
 # Instalación completa con CrowdSec y AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
 
+# Instalación completa con un servidor Redis existente
+sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
+
 # Instalación silenciosa no interactiva
 sudo ./install-bunkerweb.sh --quiet --yes
 
@@ -2124,6 +2139,11 @@ sudo ./install-bunkerweb.sh --yes --api
 
     - Las opciones de CrowdSec (`--crowdsec`, `--crowdsec-appsec`) solo son compatibles con el tipo de instalación `--full` (predeterminado)
     - No se pueden usar con instalaciones `--manager`, `--worker`, `--scheduler-only`, `--ui-only` o `--api-only`
+
+    **Limitaciones de Redis:**
+
+    - Las opciones Redis (`--redis`, `--redis-*`) solo son compatibles con `--full` (predeterminado) y `--manager`
+    - No se pueden usar con `--worker`, `--scheduler-only`, `--ui-only` o `--api-only`
 
     **Disponibilidad del servicio API:**
 

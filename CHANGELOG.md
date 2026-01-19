@@ -7,6 +7,7 @@
 - [BUGFIX] Fix timezone discrepancies when checking for daily PRO plugin updates by normalizing dates to UTC
 - [BUGFIX] Fix plugin deletion logic to correctly identify manually installed plugins so they are only removed when explicitly uninstalled
 - [LINUX] Check the installation type in the easy-install script to avoid issues when upgrading from an older version and the installation type is not `all-in-one` or `manager`
+- [LINUX] Enhance Easy Install script by adding an option to install a Redis server for data persistence and caching
 - [UI] Enhance page titles to dynamically reflect current context and navigation state for improved user experience
 - [DEPS] Update coreruleset-v3 version to v3.3.8
 - [DEPS] Update coreruleset-v4 version to v4.22.0

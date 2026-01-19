@@ -2006,7 +2006,7 @@ The easy install script is a powerful tool designed to streamline the setup of B
 
 1.  **System Analysis**: Detects your operating system and verifies it against the list of supported distributions.
 2.  **Installation Customization**: In interactive mode, it prompts you to choose an installation type (All-In-One, Manager, Worker, etc.) and decide whether to enable the web-based setup wizard.
-3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script).
+3.  **Optional Integrations**: Offers to automatically install and configure the [CrowdSec Security Engine](#crowdsec-integration-with-the-script) and Redis/Valkey for shared cache/session data.
 4.  **Dependency Management**: Installs the correct version of NGINX required by BunkerWeb from official sources and locks the version to prevent unintended upgrades.
 5.  **BunkerWeb Installation**: Adds the BunkerWeb package repository, installs the necessary packages, and locks the version.
 6.  **Service Configuration**: Sets up and enables the `systemd` services corresponding to your chosen installation type.
@@ -2026,6 +2026,7 @@ When run without any options, the script enters an interactive mode that guides 
 2.  **Setup Wizard**: Choose whether to enable the web-based configuration wizard. This is highly recommended for first-time users.
 3.  **CrowdSec Integration**: Opt-in to install the CrowdSec security engine for advanced, real-time threat protection. Available for Full Stack installations only.
 4.  **CrowdSec AppSec**: If you choose to install CrowdSec, you can also enable the Application Security (AppSec) component, which adds WAF capabilities.
+5.  **Redis/Valkey Integration**: Enable Redis/Valkey to share session data, metrics, and security data across nodes for seamless clustering and load balancing. You can install locally or point to an existing server. Available for Full Stack and Manager installations only.
 5.  **DNS Resolvers**: For Full Stack, Manager, and Worker installations, you can optionally specify custom DNS resolver IPs.
 6.  **Internal API HTTPS**: For Full Stack, Manager, and Worker installations, choose whether to enable HTTPS for internal API communication between the scheduler/manager and BunkerWeb/worker instances (default: HTTP only).
 7.  **API Service**: For Full Stack and Manager installations, choose whether to enable the optional external API service. It is disabled by default on Linux installations.
@@ -2070,6 +2071,8 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--crowdsec`        | Install and configure CrowdSec security engine.                     |
 | `--no-crowdsec`     | Skip CrowdSec installation.                                         |
 | `--crowdsec-appsec` | Install CrowdSec with AppSec component (includes WAF capabilities). |
+| `--redis`           | Install and configure Redis locally.                                |
+| `--no-redis`        | Skip Redis integration.                                             |
 
 **Advanced Options:**
 
@@ -2081,6 +2084,15 @@ For non-interactive or automated setups, the script can be controlled with comma
 | `--api-https`               | Enable HTTPS for internal API communication (default: HTTP only).                   |
 | `--backup-dir PATH`         | Directory to store automatic backup before upgrade.                                 |
 | `--no-auto-backup`          | Skip automatic backup (you MUST have done it manually).                             |
+| `--redis-host HOST`         | Redis host for an existing Redis/Valkey server.                                     |
+| `--redis-port PORT`         | Redis port for an existing Redis/Valkey server.                                     |
+| `--redis-database DB`       | Redis database number.                                                              |
+| `--redis-username USER`     | Redis username (Redis 6+).                                                          |
+| `--redis-password PASS`     | Redis password.                                                                     |
+| `--redis-ssl`               | Enable SSL/TLS for Redis connection.                                                |
+| `--redis-no-ssl`            | Disable SSL/TLS for Redis connection.                                               |
+| `--redis-ssl-verify`        | Verify Redis SSL certificate.                                                       |
+| `--redis-no-ssl-verify`     | Do not verify Redis SSL certificate.                                                |
 
 **Example Usage:**
 
@@ -2108,6 +2120,9 @@ sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-htt
 
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
+
+# Full installation using an existing Redis server
+sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
 
 # Silent non-interactive installation
 sudo ./install-bunkerweb.sh --quiet --yes
@@ -2140,6 +2155,11 @@ sudo ./install-bunkerweb.sh --manager --instances "192.168.1.10 192.168.1.11" --
 
     - CrowdSec options (`--crowdsec`, `--crowdsec-appsec`) are only compatible with `--full` (default) installation type
     - They cannot be used with `--manager`, `--worker`, `--scheduler-only`, `--ui-only`, or `--api-only` installations
+
+    **Redis Limitations:**
+
+    - Redis options (`--redis`, `--redis-*`) are only compatible with `--full` (default) and `--manager` installation types
+    - They cannot be used with `--worker`, `--scheduler-only`, `--ui-only`, or `--api-only` installations
 
     **API Service Availability:**
 

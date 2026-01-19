@@ -1998,7 +1998,7 @@ sudo ./install-bunkerweb.sh
 
 1.  **系统分析**：检测您的操作系统并对照支持的发行版列表进行验证。
 2.  **安装定制**：在交互模式下，它会提示您选择安装类型（一体化、管理器、工作节点等），并决定是否启用基于 Web 的设置向导。
-3.  **可选集成**：提供自动安装和配置 [CrowdSec 安全引擎](#crowdsec-integration-with-the-script)的选项。
+3.  **可选集成**：提供自动安装和配置 [CrowdSec 安全引擎](#crowdsec-integration-with-the-script)以及 Redis/Valkey（用于共享缓存与会话数据）的选项。
 4.  **依赖管理**：从官方源安装 BunkerWeb 所需的正确版本的 NGINX，并锁定版本以防止意外升级。
 5.  **BunkerWeb 安装**：添加 BunkerWeb 软件包仓库，安装必要的软件包，并锁定版本。
 6.  **服务配置**：根据您选择的安装类型设置并启用 `systemd` 服务。
@@ -2018,9 +2018,10 @@ sudo ./install-bunkerweb.sh
 2.  **设置向导**：选择是否启用基于 Web 的配置向导。强烈建议初次使用的用户选择此项。
 3.  **CrowdSec 集成**：选择安装 CrowdSec 安全引擎，以获得先进的实时威胁防护。仅适用于完整堆栈安装。
 4.  **CrowdSec AppSec**：如果您选择安装 CrowdSec，您还可以启用应用程序安全 (AppSec) 组件，它增加了 WAF 功能。
-5.  **DNS 解析器**：对于完整堆栈、管理器和工作节点安装，您可以选择指定自定义 DNS 解析器 IP。
-6.  **内部 API HTTPS**：对于完整堆栈、管理器和工作节点安装，选择是否为调度器/管理器与 BunkerWeb/工作节点实例之间的内部 API 通信启用 HTTPS（默认：仅 HTTP）。
-7.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
+5.  **Redis/Valkey**：启用 Redis/Valkey 以在节点之间共享会话、指标和安全数据（用于集群与负载均衡）。可本地安装或使用已有服务器。仅适用于完整堆栈和管理器安装。
+6.  **DNS 解析器**：对于完整堆栈、管理器和工作节点安装，您可以选择指定自定义 DNS 解析器 IP。
+7.  **内部 API HTTPS**：对于完整堆栈、管理器和工作节点安装，选择是否为调度器/管理器与 BunkerWeb/工作节点实例之间的内部 API 通信启用 HTTPS（默认：仅 HTTP）。
+8.  **API 服务**：对于完整堆栈和管理器安装，选择是否启用可选的外部 API 服务。在 Linux 安装中，它默认是禁用的。
 
 !!! info "管理器和调度器安装"
     如果您选择**管理器**或**仅调度器**安装类型，系统还会提示您提供您的 BunkerWeb 工作节点实例的 IP 地址或主机名。
@@ -2062,6 +2063,8 @@ sudo ./install-bunkerweb.sh
 | `--crowdsec`        | 安装并配置 CrowdSec 安全引擎。                     |
 | `--no-crowdsec`     | 跳过 CrowdSec 安装。                               |
 | `--crowdsec-appsec` | 安装带有 AppSec 组件的 CrowdSec（包括 WAF 功能）。 |
+| `--redis`           | 本地安装并配置 Redis。                             |
+| `--no-redis`        | 跳过 Redis 集成。                                  |
 
 **高级选项：**
 
@@ -2073,6 +2076,15 @@ sudo ./install-bunkerweb.sh
 | `--api-https`               | 为内部 API 通信启用 HTTPS（默认：仅 HTTP）。                     |
 | `--backup-dir PATH`         | 升级前存储自动备份的目录。                                       |
 | `--no-auto-backup`          | 跳过自动备份（您必须手动完成）。                                 |
+| `--redis-host HOST`         | 现有 Redis/Valkey 服务器的主机。                                 |
+| `--redis-port PORT`         | 现有 Redis/Valkey 服务器的端口。                                 |
+| `--redis-database DB`       | Redis 数据库编号。                                               |
+| `--redis-username USER`     | Redis 用户名（Redis 6+）。                                       |
+| `--redis-password PASS`     | Redis 密码。                                                     |
+| `--redis-ssl`               | 为 Redis 连接启用 SSL/TLS。                                      |
+| `--redis-no-ssl`            | 禁用 Redis 连接的 SSL/TLS。                                      |
+| `--redis-ssl-verify`        | 验证 Redis SSL 证书。                                            |
+| `--redis-no-ssl-verify`     | 不验证 Redis SSL 证书。                                          |
 
 **用法示例：**
 
@@ -2101,6 +2113,9 @@ sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-htt
 # 带有 CrowdSec 和 AppSec 的完整安装
 sudo ./install-bunkerweb.sh --crowdsec-appsec
 
+# 使用现有 Redis 服务器的完整安装
+sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
+
 # 静默非交互式安装
 sudo ./install-bunkerweb.sh --quiet --yes
 
@@ -2123,6 +2138,11 @@ sudo ./install-bunkerweb.sh --yes --api
 
     - CrowdSec 选项（`--crowdsec`, `--crowdsec-appsec`）仅与 `--full`（默认）安装类型兼容
     - 它们不能与 `--manager`, `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
+
+    **Redis 限制：**
+
+    - Redis 选项（`--redis`, `--redis-*`）仅与 `--full`（默认）和 `--manager` 安装类型兼容
+    - 它们不能与 `--worker`, `--scheduler-only`, `--ui-only` 或 `--api-only` 安装一起使用
 
     **API 服务可用性：**
 

@@ -2000,7 +2000,7 @@ Le script d'installation facile est un outil puissant conçu pour rationaliser l
 
 1.  **Analyse du système**: détecte votre système d'exploitation et le compare à la liste des distributions prises en charge.
 2.  **Personnalisation de l'installation**: en mode interactif, il vous invite à choisir un type d'installation (Tout en un, Manager, Worker, etc.) et à décider d'activer ou non l'assistant de configuration Web.
-3.  **Intégrations facultatives**: propose d'installer et de configurer automatiquement le [moteur de sécurité CrowdSec](#crowdsec-integration-with-the-script).
+3.  **Intégrations facultatives**: propose d'installer et de configurer automatiquement le [moteur de sécurité CrowdSec](#crowdsec-integration-with-the-script) ainsi que Redis/Valkey pour le cache et les sessions partagés.
 4.  **Gestion des **dépendances : Installe la version correcte de NGINX requise par BunkerWeb à partir de sources officielles et verrouille la version pour éviter les mises à niveau involontaires.
 5.  **Installation de BunkerWeb**: Ajoute le référentiel de paquets BunkerWeb, installe les paquets nécessaires et verrouille la version.
 6.  **Configuration du service** : Configure et active les `systemd` services correspondant au type d'installation que vous avez choisi.
@@ -2017,9 +2017,10 @@ Lorsqu'il est exécuté sans aucune option, le script passe en mode interactif q
     *   **Planificateur uniquement** : installe uniquement le composant Planificateur.
     *   **Interface utilisateur Web uniquement** : installe uniquement le composant Interface utilisateur Web.
 2.  **Assistant d'installation**: choisissez d'activer ou non l'assistant de configuration Web. Ceci est fortement recommandé pour les nouveaux utilisateurs.
-3.  **Intégration CrowdSec**: choisissez d'installer le moteur de sécurité CrowdSec pour une protection avancée et en temps réel contre les menaces.
+3.  **Intégration CrowdSec**: choisissez d'installer le moteur de sécurité CrowdSec pour une protection avancée et en temps réel contre les menaces (Full Stack uniquement).
 4.  **CrowdSec AppSec**: si vous choisissez d'installer CrowdSec, vous pouvez également activer le composant Application Security (AppSec), qui ajoute des fonctionnalités WAF.
-5.  **Service API** : choisissez d'activer le service API BunkerWeb optionnel. Il est désactivé par défaut sur les installations Linux.
+5.  **Redis/Valkey**: active Redis/Valkey pour partager les sessions, métriques et données de sécurité entre nœuds (clustering et équilibrage de charge). Installation locale ou serveur existant. Disponible pour Full Stack et Manager uniquement.
+6.  **Service API** : choisissez d'activer le service API BunkerWeb optionnel. Il est désactivé par défaut sur les installations Linux.
 
 !!! info "Installations du gestionnaire et du Scheduler"
     Si vous choisissez le type d'installation **Manager** ou **Scheduler Only**, vous serez également invité à fournir les adresses IP ou les noms d'hôte de vos instances de travail BunkerWeb.
@@ -2061,6 +2062,8 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 | `--crowdsec`        | Installez et configurez le moteur de sécurité CrowdSec.                       |
 | `--no-crowdsec`     | Ignorez l'installation de CrowdSec.                                           |
 | `--crowdsec-appsec` | Installez CrowdSec avec le composant AppSec (inclut les fonctionnalités WAF). |
+| `--redis`           | Installe et configure Redis localement.                                       |
+| `--no-redis`        | Ignore l'intégration Redis.                                                   |
 
 **Options avancées :**
 
@@ -2072,6 +2075,15 @@ Pour les configurations non interactives ou automatisées, le script peut être 
 | `--api-https`               | Activer HTTPS pour la communication API interne (par défaut : HTTP uniquement).                        |
 | `--backup-dir PATH`         | Répertoire pour stocker la sauvegarde automatique avant la mise à jour.                                |
 | `--no-auto-backup`          | Ignorer la sauvegarde automatique (vous DEVEZ l'avoir fait manuellement).                              |
+| `--redis-host HOST`         | Hôte Redis pour un serveur Redis/Valkey existant.                                                     |
+| `--redis-port PORT`         | Port Redis pour un serveur Redis/Valkey existant.                                                     |
+| `--redis-database DB`       | Numéro de base de données Redis.                                                                      |
+| `--redis-username USER`     | Nom d'utilisateur Redis (Redis 6+).                                                                   |
+| `--redis-password PASS`     | Mot de passe Redis.                                                                                   |
+| `--redis-ssl`               | Activer SSL/TLS pour la connexion Redis.                                                              |
+| `--redis-no-ssl`            | Désactiver SSL/TLS pour la connexion Redis.                                                           |
+| `--redis-ssl-verify`        | Vérifier le certificat SSL de Redis.                                                                  |
+| `--redis-no-ssl-verify`     | Ne pas vérifier le certificat SSL de Redis.                                                           |
 
 **Exemple d'utilisation :**
 
@@ -2100,6 +2112,9 @@ sudo ./install-bunkerweb.sh --worker --dns-resolvers "1.1.1.1 1.0.0.1" --api-htt
 # Full installation with CrowdSec and AppSec
 sudo ./install-bunkerweb.sh --crowdsec-appsec
 
+# Installation complète avec un serveur Redis existant
+sudo ./install-bunkerweb.sh --redis-host redis.example.com --redis-password "your-strong-password"
+
 # Silent non-interactive installation
 sudo ./install-bunkerweb.sh --quiet --yes
 
@@ -2119,6 +2134,11 @@ sudo ./install-bunkerweb.sh --dry-run
 
     - Les options CrowdSec (`--crowdsec`, `--crowdsec-appsec`) ne sont compatibles qu'avec le type d'installation `--full` (par défaut)
     - Ils ne peuvent pas être utilisés avec les installations `--manager`, `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`
+
+    **Limitations Redis :**
+
+    - Les options Redis (`--redis`, `--redis-*`) ne sont compatibles qu'avec `--full` (par défaut) et `--manager`
+    - Elles ne peuvent pas être utilisées avec `--worker`, `--scheduler-only`, `--ui-only` ou `--api-only`
 
     **Disponibilité du service API :**
 
