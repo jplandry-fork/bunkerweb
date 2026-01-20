@@ -220,6 +220,9 @@ def ensure_accounts(
             check=False,
         )
         if proc.returncode != 0:
+            if "existing account" in proc.stdout.lower():
+                logger.info(f"Let's Encrypt account already exists (staging={staging}, email={'set' if email else 'empty'}), skipping registration.")
+                continue
             logger.error(f"Failed to register Let's Encrypt account (staging={staging}, email={'set' if email else 'empty'}):\n{proc.stdout}")
 
 
