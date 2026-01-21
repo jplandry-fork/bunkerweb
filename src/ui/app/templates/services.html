@@ -244,6 +244,63 @@
         <div class="toast-body" data-i18n="flash.easter_egg">If you read this, it means that you're curious 👀</div>
     </div>
     {% if not is_readonly %}
+        <div class="modal modal-xl fade"
+             id="modal-import-services"
+             data-bs-backdrop="static"
+             tabindex="-1"
+             aria-hidden="true"
+             role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="modal.title.import_services">Import services</h5>
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                                data-i18n="aria.label.close"></button>
+                    </div>
+                    <form action="{{ url_for("services") }}/import"
+                          method="POST"
+                          enctype="multipart/form-data">
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                            <div role="button"
+                                 id="services-drag-area"
+                                 class="border border-primary border-2 border-dashed rounded d-flex justify-content-center align-items-center h-px-200">
+                                <div class="text-center">
+                                    <i class="bx bx-lg bxs-cloud-upload text-primary"></i>
+                                    <p class="mt-3 fs-5" data-i18n="modal.body.import_services_dropzone">
+                                        Drag and drop your services export file here or click to select a file.
+                                    </p>
+                                </div>
+                            </div>
+                            <input type="file"
+                                   id="services-import-file"
+                                   name="services_file"
+                                   accept=".env,text/plain"
+                                   class="visually-hidden"
+                                   required />
+                            <div id="services-import-file-list" class="mt-3"></div>
+                            <div class="alert alert-warning text-center mt-3"
+                                 role="alert"
+                                 data-i18n="modal.body.import_services_warning">
+                                Importing services will create new UI services from the export file. Existing services are skipped.
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="submit"
+                                    class="btn btn-outline-primary me-2"
+                                    data-i18n="button.import_services">Import services</button>
+                            <button type="reset"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal"
+                                    data-i18n="button.cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="modal fade"
              id="modal-convert-services"
              data-bs-backdrop="static"

@@ -19,6 +19,9 @@ $(document).ready(function () {
   const templates = ($("#templates").val() || "").trim().split(" ");
   const isReadOnly = $("#is-read-only").val().trim() === "True";
   const userReadOnly = $("#user-read-only").val().trim() === "True";
+  const importDragArea = $("#services-drag-area");
+  const importFileInput = $("#services-import-file");
+  const importFileList = $("#services-import-file-list");
 
   const templatesSearchPanesOptions = [
     {
@@ -164,6 +167,9 @@ $(document).ready(function () {
       extend: "create_service",
     },
     {
+      extend: "import_services",
+    },
+    {
       extend: "colvis",
       columns: "th:not(:nth-child(-n+3)):not(:last-child)",
       text: `<span class="tf-icons bx bx-columns bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.columns">${t(
@@ -283,6 +289,13 @@ $(document).ready(function () {
         .val("");
     },
   );
+  $("#modal-import-services").on("hidden.bs.modal", function () {
+    importFileInput.val("");
+    importFileList.empty();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+  });
 
   const getSelectedServices = () =>
     $("tr.selected")
@@ -296,7 +309,7 @@ $(document).ready(function () {
       "button.create_service",
       "Create new service",
     )}</span>`,
-    className: `btn btn-sm rounded me-4 btn-bw-green${
+    className: `btn btn-sm rounded me-2 btn-bw-green${
       isReadOnly ? " disabled" : ""
     }`,
     action: function () {
@@ -310,6 +323,33 @@ $(document).ready(function () {
         return;
       }
       window.location.href = `${window.location.href}/new`;
+    },
+  };
+
+  $.fn.dataTable.ext.buttons.import_services = {
+    text: `<span class="tf-icons bx bx-import bx-18px me-md-2"></span><span class="d-none d-md-inline" data-i18n="button.import_services">${t(
+      "button.import_services",
+      "Import services",
+    )}</span>`,
+    className: `btn btn-sm rounded btn-outline-bw-green me-2${
+      isReadOnly ? " disabled" : ""
+    }`,
+    action: function () {
+      if (isReadOnly) {
+        alert(
+          t(
+            "alert.readonly_mode",
+            "This action is not allowed in read-only mode.",
+          ),
+        );
+        return;
+      }
+      importFileInput.val("");
+      importFileList.empty();
+      const modalInstance = new bootstrap.Modal(
+        document.getElementById("modal-import-services"),
+      );
+      modalInstance.show();
     },
   };
 
@@ -656,5 +696,54 @@ $(document).ready(function () {
     const service = $(this).data("service-id");
     const conversionType = $(this).data("value");
     setupConversionModal([service], conversionType);
+  });
+
+  const validateImportFile = (file) => {
+    const fileName = file.name.toLowerCase();
+    return fileName.endsWith(".env") || fileName.endsWith(".txt");
+  };
+
+  importDragArea.on("click", function () {
+    importFileInput.click();
+  });
+
+  importDragArea.on("dragover", function (e) {
+    e.preventDefault();
+    importDragArea.removeClass("border-dashed");
+    importDragArea.addClass("bg-primary text-white");
+    importDragArea.find("i").removeClass("text-primary");
+  });
+
+  importDragArea.on("dragleave", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+  });
+
+  importFileInput.on("change", function () {
+    const file = this.files && this.files[0];
+    importFileList.empty();
+    if (!file) {
+      return;
+    }
+    if (!validateImportFile(file)) {
+      alert("Please upload a valid services export file (.env).");
+      importFileInput.val("");
+      return;
+    }
+    const fileSize = (file.size / 1024).toFixed(2);
+    importFileList.append(
+      `<div class="file-item"><strong>${file.name}</strong> (${fileSize} KB)</div>`,
+    );
+  });
+
+  importDragArea.on("drop", function (e) {
+    e.preventDefault();
+    importDragArea.addClass("border-dashed");
+    importDragArea.removeClass("bg-primary text-white");
+    importDragArea.find("i").addClass("text-primary");
+    importFileInput.prop("files", e.originalEvent.dataTransfer.files);
+    importFileInput.trigger("change");
   });
 });
