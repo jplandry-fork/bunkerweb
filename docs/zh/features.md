@@ -922,12 +922,10 @@ STREAM 支持 :warning:
 
     `BLACKLIST_COMMUNITY_LISTS` 设置允许您从精选的黑名单源中进行选择。可用选项包括：
 
-    | ID                                                                                                                           | 描述                                                                                                                                                                        | 来源                                                                                                                           |
-    | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-    | `ip:laurent-minne-data-shield-aggressive`                                                                                    | Data-Shield IPv4 黑名单。DST = 欧洲                                                                                                                                         |
-    | `https://raw.githubusercontent.com/duggytuxy/Data-Shield_IPv4_Blocklist/refs/heads/main/prod_data-shield_ipv4_blocklist.txt` |
-    | `ip:danmeuk-tor-exit`                                                                                                        | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
-    | `ua:mitchellkrogza-bad-user-agents`                                                                                          | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
+    | ID                                  | 描述                                                                                                                                                                        | 来源                                                                                                                           |
+    | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+    | `ip:danmeuk-tor-exit`               | Tor 出口节点 IP (dan.me.uk)                                                                                                                                                 | `https://www.dan.me.uk/torlist/?exit`                                                                                          |
+    | `ua:mitchellkrogza-bad-user-agents` | Nginx 阻止不良机器人、垃圾邮件引荐来源、漏洞扫描器、用户代理、恶意软件、广告软件、勒索软件、恶意网站，具有反 DDOS、Wordpress 主题检测器阻止和针对重复违规者的 Fail2Ban Jail | `https://raw.githubusercontent.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker/master/_generator_lists/bad-user-agents.list` |
 
     **配置：** 指定多个列表，以空格分隔。例如：
     ```yaml
@@ -3989,12 +3987,11 @@ Validates incoming HTTP requests against an OpenAPI / Swagger specification.
 | 参数                         | 默认值                              | 上下文    | 可重复 | 描述                                                                                            |
 | ---------------------------- | ----------------------------------- | --------- | ------ | ----------------------------------------------------------------------------------------------- |
 | `USE_OPENAPI_VALIDATOR`      | `no`                                | multisite | 否     | Enable OpenAPI route validation for this site.                                                  |
-| `OPENAPI_SPEC`               |                                     | multisite | 否     | Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON format.                  |
+| `OPENAPI_SPEC`               |                                     | multisite | 否     | Absolute path or HTTP(S) URL to the OpenAPI (swagger) document in JSON/YAML format.             |
 | `OPENAPI_BASE_PATH`          |                                     | multisite | 否     | Optional base path prefix to prepend to every path in the spec (overrides servers[*].url path). |
 | `OPENAPI_ALLOW_UNSPECIFIED`  | `no`                                | multisite | 否     | Allow requests to paths not listed in the specification (otherwise they are denied).            |
 | `OPENAPI_ALLOW_INSECURE_URL` | `no`                                | multisite | 否     | Allow fetching the OpenAPI spec over plain HTTP (not recommended).                              |
 | `OPENAPI_IGNORE_URLS`        | `^/docs$ ^/redoc$ ^/openapi\.json$` | multisite | 否     | List of URL regexes to bypass OpenAPI validation (space separated).                             |
-| `OPENAPI_CACHE_TTL`          | `300`                               | global    | 否     | Seconds to cache the parsed specification in shared cache.                                      |
 | `OPENAPI_MAX_SPEC_SIZE`      | `2M`                                | global    | 否     | Maximum allowed size of the OpenAPI document (accepts suffix k/M/G).                            |
 | `OPENAPI_VALIDATE_PARAMS`    | `yes`                               | multisite | 否     | Validate query, header, cookie, and path parameters against the OpenAPI specification.          |
 
