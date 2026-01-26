@@ -2,6 +2,7 @@
 
 ## v1.6.8~rc3 - 2026/01/??
 
+- [UI] Change redirect status code from 302 to 303 in the web UI to follow best practices for redirection after form submissions
 - [MISC] Deprecate Laurent Minne's blacklist given the upcoming changes
 
 ## v1.6.8~rc2 - 2026/01/23
