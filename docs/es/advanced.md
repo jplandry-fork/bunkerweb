@@ -1278,7 +1278,7 @@ Algunas integraciones proporcionan formas más convenientes de aplicar configura
 
     ```yaml
     myapp:
-      image: nginxdemos/nginx-hello
+      image: bunkerity/bunkerweb-hello:v1.0
       labels:
         - |
           bunkerweb.CUSTOM_CONF_SERVER_HTTP_hello-world=

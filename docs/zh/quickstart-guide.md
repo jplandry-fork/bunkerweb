@@ -700,7 +700,7 @@
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
 
@@ -744,7 +744,7 @@
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
     	  labels:
@@ -786,7 +786,7 @@
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/nginx-hello
+    		image: bunkerity/bunkerweb-hello:v1.0
     		ports:
     		- containerPort: 8080
     ---
@@ -838,7 +838,7 @@
     ```yaml
     services:
       myapp:
-        image: nginxdemos/nginx-hello
+        image: bunkerity/bunkerweb-hello:v1.0
         networks:
           - bw-services
         deploy:

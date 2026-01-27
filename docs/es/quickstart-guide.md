@@ -699,7 +699,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
 
@@ -743,7 +743,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
     	  labels:
@@ -785,7 +785,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/nginx-hello
+    		image: bunkerity/bunkerweb-hello:v1.0
     		ports:
     		- containerPort: 8080
     ---
@@ -837,7 +837,7 @@ Ahora puedes iniciar sesión con la cuenta de administrador que creaste durante 
     ```yaml
     services:
       myapp:
-        image: nginxdemos/nginx-hello
+        image: bunkerity/bunkerweb-hello:v1.0
         networks:
           - bw-services
         deploy:

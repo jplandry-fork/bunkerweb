@@ -699,7 +699,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
 
@@ -743,7 +743,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
     	  labels:
@@ -785,7 +785,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/nginx-hello
+    		image: bunkerity/bunkerweb-hello:v1.0
     		ports:
     		- containerPort: 8080
     ---
@@ -837,7 +837,7 @@ Sie können sich nun mit dem während des Einrichtungsassistenten erstellten Adm
     ```yaml
     services:
       myapp:
-        image: nginxdemos/nginx-hello
+        image: bunkerity/bunkerweb-hello:v1.0
         networks:
           - bw-services
         deploy:

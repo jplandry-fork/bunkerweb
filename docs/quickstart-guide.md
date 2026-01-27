@@ -700,7 +700,7 @@ You can now log in with the administrator account you created during the setup w
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
 
@@ -744,7 +744,7 @@ You can now log in with the administrator account you created during the setup w
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
     	  labels:
@@ -786,7 +786,7 @@ You can now log in with the administrator account you created during the setup w
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/nginx-hello
+    		image: bunkerity/bunkerweb-hello:v1.0
     		ports:
     		- containerPort: 8080
     ---
@@ -838,7 +838,7 @@ You can now log in with the administrator account you created during the setup w
     ```yaml
     services:
       myapp:
-        image: nginxdemos/nginx-hello
+        image: bunkerity/bunkerweb-hello:v1.0
         networks:
           - bw-services
         deploy:

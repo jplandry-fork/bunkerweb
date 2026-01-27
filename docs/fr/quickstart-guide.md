@@ -700,7 +700,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
 
@@ -744,7 +744,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
     ```yaml
     services:
       myapp:
-    	  image: nginxdemos/nginx-hello
+    	  image: bunkerity/bunkerweb-hello:v1.0
     	  networks:
     	    - bw-services
     	  labels:
@@ -786,7 +786,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
     	spec:
     	  containers:
     	  - name: app
-    		image: nginxdemos/nginx-hello
+    		image: bunkerity/bunkerweb-hello:v1.0
     		ports:
     		- containerPort: 8080
     ---
@@ -838,7 +838,7 @@ Vous pouvez maintenant vous connecter avec le compte administrateur que vous ave
     ```yaml
     services:
       myapp:
-        image: nginxdemos/nginx-hello
+        image: bunkerity/bunkerweb-hello:v1.0
         networks:
           - bw-services
         deploy:
