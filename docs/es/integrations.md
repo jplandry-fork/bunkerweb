@@ -2755,7 +2755,7 @@ Asegúrate de que los servicios de autoconfiguración tengan acceso a la API de 
 
 Además, **es crucial establecer la variable de entorno `KUBERNETES_MODE` en `yes` cuando se utiliza la integración con Kubernetes**. Esta variable es obligatoria para un funcionamiento correcto.
 
-### Métodos de instalación
+### Métodos de instalación {#kubernetes-installation}
 
 #### Usando el chart de Helm (recomendado)
 
@@ -3610,13 +3610,13 @@ spec:
 Puedes visitar `http(s)://myapp.example.com`, que ahora está protegido con BunkerWeb 🛡️
 
 
-### Migrar desde el controlador de ingress nginx
+### Migrar desde el controlador de ingress nginx {#migrate-from-nginx-ingress-controller}
 
 #### Introducción
 
 Esta guía práctica le acompaña en la migración de sus recursos **NGINX Ingress** a **BunkerWeb**. Se centra en la conversión de sus manifiestos de Kubernetes existentes con ejemplos de uso.
 
-**Requisitos previos**: BunkerWeb debe estar instalado en su clúster (consulte la [documentación oficial](https://docs.bunkerweb.io/latest/integrations/#kubernetes)).
+**Requisitos previos**: BunkerWeb debe estar instalado en su clúster (consulte [métodos de instalación](#kubernetes-installation)).
 
 #### Estrategia de migración
 
@@ -3650,70 +3650,71 @@ kubectl delete ingress <ingress-antiguo> -n <namespace>
 #### Ejemplo 1: Ingress estándar
 
 ##### Escenario
+
 Una aplicación web simple con HTTPS automático a través de cert-manager.
 
-##### NGINX Ingress
+=== "NGINX Ingress"
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: webapp-ingress
-  namespace: production
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-spec:
-  tls:
-  - hosts:
-    - webapp.example.com
-    secretName: webapp-tls
-  rules:
-  - host: webapp.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: webapp-service
-            port:
-              number: 80
-```
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: webapp-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    spec:
+      tls:
+      - hosts:
+        - webapp.example.com
+        secretName: webapp-tls
+      rules:
+      - host: webapp.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webapp-service
+                port:
+                  number: 80
+    ```
 
-##### BunkerWeb Ingress
+=== "BunkerWeb Ingress"
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: webapp-ingress
-  namespace: production
-  annotations:
-    # Let's Encrypt automático de BunkerWeb (alternativa a cert-manager)
-    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/LETS_ENCRYPT_EMAIL: "admin@example.com"
-    
-    # O mantener cert-manager (comentar AUTO_LETS_ENCRYPT arriba)
-    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
-spec:
-  ingressClassName: bunkerweb  # Cambio principal: clase Ingress
-  tls:
-  - hosts:
-    - webapp.example.com
-    secretName: webapp-tls
-  rules:
-  - host: webapp.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: webapp-service
-            port:
-              number: 80
-```
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: webapp-ingress
+      namespace: production
+      annotations:
+        # Let's Encrypt automático de BunkerWeb (alternativa a cert-manager)
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+        
+        # O mantener cert-manager (comentar AUTO_LETS_ENCRYPT arriba)
+        # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    spec:
+      ingressClassName: bunkerweb  # Cambio principal: clase Ingress
+      tls:
+      - hosts:
+        - webapp.example.com
+        secretName: webapp-tls
+      rules:
+      - host: webapp.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webapp-service
+                port:
+                  number: 80
+    ```
 
 ##### Diferencias clave
 
@@ -3728,119 +3729,120 @@ spec:
 #### Ejemplo 2: Ingress con anotaciones
 
 ##### Escenario
+
 API REST con limitación de tasa, CORS, redirección HTTPS y configuración de timeout.
 
-##### NGINX Ingress
+=== "NGINX Ingress"
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: api-ingress
-  namespace: production
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    
-    # Redirección HTTPS
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    
-    # CORS
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.example.com,https://admin.example.com"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-    
-    # Limitación de tasa
-    nginx.ingress.kubernetes.io/limit-rps: "20"
-    nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
-    
-    # Timeouts y tamaño
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
-    
-    # Cabeceras
-    nginx.ingress.kubernetes.io/proxy-set-headers: "custom-headers"
-spec:
-  tls:
-  - hosts:
-    - api.example.com
-    secretName: api-tls
-  rules:
-  - host: api.example.com
-    http:
-      paths:
-      - path: /v1
-        pathType: Prefix
-        backend:
-          service:
-            name: api-service
-            port:
-              number: 8080
-```
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: api-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        
+        # Redirección HTTPS
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        
+        # CORS
+        nginx.ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.example.com,https://admin.example.com"
+        nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+        nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+        
+        # Limitación de tasa
+        nginx.ingress.kubernetes.io/limit-rps: "20"
+        nginx.ingress.kubernetes.io/limit-burst-multiplier: "5"
+        
+        # Timeouts y tamaño
+        nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+        nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+        
+        # Cabeceras
+        nginx.ingress.kubernetes.io/proxy-set-headers: "custom-headers"
+    spec:
+      tls:
+      - hosts:
+        - api.example.com
+        secretName: api-tls
+      rules:
+      - host: api.example.com
+        http:
+          paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+    ```
 
-##### BunkerWeb Ingress
+=== "BunkerWeb Ingress"
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: api-ingress
-  namespace: production
-  annotations:
-    # SSL automático
-    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/LETS_ENCRYPT_EMAIL: "admin@example.com"
-    
-    # Redirección HTTPS
-    bunkerweb.io/REDIRECT_HTTP_TO_HTTPS: "yes"
-    
-    # CORS
-    bunkerweb.io/USE_CORS: "yes"
-    bunkerweb.io/CORS_ALLOW_ORIGIN: "https://app.example.com https://admin.example.com"
-    bunkerweb.io/CORS_ALLOW_METHODS: "GET,POST,PUT,DELETE,OPTIONS"
-    bunkerweb.io/CORS_ALLOW_CREDENTIALS: "yes"
-    
-    # Limitación de tasa
-    bunkerweb.io/USE_LIMIT_REQ: "yes"
-    bunkerweb.io/LIMIT_REQ_RATE: "20r/s"
-    bunkerweb.io/LIMIT_REQ_BURST: "100"
-    
-    # Timeouts
-    bunkerweb.io/PROXY_CONNECT_TIMEOUT: "10"
-    bunkerweb.io/PROXY_SEND_TIMEOUT: "60"
-    bunkerweb.io/PROXY_READ_TIMEOUT: "60"
-    
-    # Tamaño máximo del cuerpo
-    bunkerweb.io/MAX_CLIENT_SIZE: "20m"
-    
-    # Cabeceras personalizadas
-    bunkerweb.io/CUSTOM_HEADER: "X-API-Version: v1"
-    
-    # Seguridad adicional (bonus BunkerWeb)
-    bunkerweb.io/USE_MODSECURITY: "yes"
-    bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
-spec:
-  ingressClassName: bunkerweb
-  tls:
-  - hosts:
-    - api.example.com
-    secretName: api-tls
-  rules:
-  - host: api.example.com
-    http:
-      paths:
-      - path: /v1
-        pathType: Prefix
-        backend:
-          service:
-            name: api-service
-            port:
-              number: 8080
-```
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: api-ingress
+      namespace: production
+      annotations:
+        # SSL automático
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+        
+        # Redirección HTTPS
+        bunkerweb.io/REDIRECT_HTTP_TO_HTTPS: "yes"
+        
+        # CORS
+        bunkerweb.io/USE_CORS: "yes"
+        bunkerweb.io/CORS_ALLOW_ORIGIN: "^https://(app|admin).example.com$"
+        bunkerweb.io/CORS_ALLOW_METHODS: "GET, POST, PUT, DELETE, OPTIONS"
+        bunkerweb.io/CORS_ALLOW_CREDENTIALS: "yes"
+        
+        # Limitación de tasa
+        bunkerweb.io/USE_LIMIT_REQ: "yes"
+        bunkerweb.io/LIMIT_REQ_URL: "/"
+        bunkerweb.io/LIMIT_REQ_RATE: "20r/s"
+        
+        # Timeouts
+        bunkerweb.io/REVERSE_PROXY_CONNECT_TIMEOUT: "10s"
+        bunkerweb.io/REVERSE_PROXY_SEND_TIMEOUT: "60s"
+        bunkerweb.io/REVERSE_PROXY_READ_TIMEOUT: "60s"
+        
+        # Tamaño máximo del cuerpo
+        bunkerweb.io/MAX_CLIENT_SIZE: "20m"
+        
+        # Cabeceras personalizadas
+        bunkerweb.io/CUSTOM_HEADER: "X-API-Version: v1"
+        
+        # Seguridad adicional (bonus BunkerWeb)
+        bunkerweb.io/USE_MODSECURITY: "yes"
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - api.example.com
+        secretName: api-tls
+      rules:
+      - host: api.example.com
+        http:
+          paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 8080
+    ```
 
 ##### Conversión de anotaciones
 
@@ -3848,227 +3850,245 @@ spec:
 |----------------|---------------|-------------------|
 | Redirección HTTPS | `ssl-redirect: "true"` | `REDIRECT_HTTP_TO_HTTPS: "yes"` |
 | Activar CORS | `enable-cors: "true"` | `USE_CORS: "yes"` |
-| Orígenes CORS | `cors-allow-origin: "https://..."` | `CORS_ALLOW_ORIGIN: "https://..."` (espacios en lugar de comas) |
-| Métodos CORS | `cors-allow-methods: "GET, POST"` | `CORS_ALLOW_METHODS: "GET,POST"` (sin espacios) |
-| Limitación de tasa | `limit-rps: "20"` | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_RATE: "20r/s"` |
+| Orígenes CORS | `cors-allow-origin: "https://..."` | `CORS_ALLOW_ORIGIN: "^https://..."` (expresión regular PCRE o `*` o `self`) |
+| Métodos CORS | `cors-allow-methods: "GET, POST"` | `CORS_ALLOW_METHODS: "GET, POST"` |
+| Limitación de tasa | `limit-rps: "20"` | `USE_LIMIT_REQ: "yes"` + `LIMIT_REQ_URL: "/"` + `LIMIT_REQ_RATE: "20r/s"` |
+| Timeouts | `proxy-*-timeout: "60"` | `REVERSE_PROXY_*_TIMEOUT: "60s"` |
 | Tamaño del cuerpo | `proxy-body-size: "20m"` | `MAX_CLIENT_SIZE: "20m"` |
-| Timeouts | `proxy-*-timeout: "60"` | `PROXY_*_TIMEOUT: "60"` |
+| Cabeceras personalizadas | `proxy-set-headers: "custom-headers"` | `CUSTOM_HEADER: "Header-Name: value"` (múltiples anotaciones para varios encabezados) |
+| Seguridad | N/A | `USE_MODSECURITY: "yes"` + `USE_BAD_BEHAVIOR: "yes"` |
 
 ---
 
 #### Ejemplo 3: Ingress con configuración NGINX personalizada
 
 ##### Escenario
+
 Aplicación con reglas NGINX personalizadas a través de `configuration-snippet`: reglas de reescritura complejas, autenticación, cabeceras especiales.
 
-##### NGINX Ingress
+=== "NGINX Ingress"
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: custom-app-ingress
-  namespace: production
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    
-    # Autenticación básica
-    nginx.ingress.kubernetes.io/auth-type: basic
-    nginx.ingress.kubernetes.io/auth-secret: basic-auth
-    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
-    
-    # Lista blanca de IP
-    nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12"
-    
-    # Configuración personalizada mediante snippet
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Reescritura personalizada
-      rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
-      
-      # Cabeceras condicionales
-      if ($request_uri ~* ^/api/) {
-        add_header X-API-Gateway "true";
-      }
-      
-      # Bloquear ciertos user agents
-      if ($http_user_agent ~* (bot|crawler|spider)) {
-        return 403;
-      }
-      
-      # Caché para assets
-      location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
-        expires 7d;
-        add_header Cache-Control "public, immutable";
-      }
-      
-      # Límite de conexiones concurrentes
-      limit_conn addr 10;
-      
-      # Proxy a servicio externo para una ruta
-      location /external-api {
-        proxy_pass https://external-service.com;
-        proxy_set_header Host external-service.com;
-      }
-spec:
-  tls:
-  - hosts:
-    - custom-app.example.com
-    secretName: custom-app-tls
-  rules:
-  - host: custom-app.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: custom-app-service
-            port:
-              number: 80
+    ```yaml title="nginx-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        kubernetes.io/ingress.class: "nginx"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        
+        # Autenticación básica
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: basic-auth
+        nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+        
+        # Lista blanca de IP
+        nginx.ingress.kubernetes.io/whitelist-source-range: "10.0.0.0/8,172.16.0.0/12"
+        
+        # Configuración personalizada mediante snippet
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          # Reescritura personalizada
+          rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
+          
+          # Cabeceras condicionales
+          if ($request_uri ~* ^/api/) {
+            add_header X-API-Gateway "true";
+          }
+          
+          # Bloquear ciertos user agents
+          if ($http_user_agent ~* (bot|crawler|spider)) {
+            return 403;
+          }
+          
+          # Caché para assets
+          location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+            expires 7d;
+            add_header Cache-Control "public, immutable";
+          }
+          
+          # Límite de conexiones concurrentes
+          limit_conn addr 10;
+          
+          # Proxy a servicio externo para una ruta
+          location /external-api {
+            proxy_pass https://external-service.com;
+            proxy_set_header Host external-service.com;
+          }
+    spec:
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
 
----
-# ConfigMap para autenticación
-apiVersion: v1
-kind: Secret
-metadata:
-  name: basic-auth
-  namespace: production
-type: Opaque
-data:
-  auth: dXNlcjokYXByMSRIRzJLbkZNTyR5ZnBmRUxYVXFTSGg0ME5pRC8uNGcuCg==  # user:password
-```
+    ---
+    # ConfigMap para autenticación
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: basic-auth
+      namespace: production
+    type: Opaque
+    data:
+      auth: dXNlcjokYXByMSRIRzJLbkZNTyR5ZnBmRUxYVXFTSGg0ME5pRC8uNGcuCg==  # user:password
+    ```
 
-##### BunkerWeb Ingress
+=== "BunkerWeb Ingress"
 
-###### Opción A: Uso de funcionalidades nativas de BunkerWeb
+    <!-- ###### Opción A: Uso de funciones nativas de BunkerWeb -->
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: custom-app-ingress
-  namespace: production
-  annotations:
-    # SSL
-    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/LETS_ENCRYPT_EMAIL: "admin@example.com"
-    
-    # Autenticación básica (nativa BunkerWeb)
-    bunkerweb.io/USE_AUTH_BASIC: "yes"
-    bunkerweb.io/AUTH_BASIC_TEXT: "Authentication Required"
-    bunkerweb.io/AUTH_BASIC_USER: "user"
-    bunkerweb.io/AUTH_BASIC_PASSWORD: "password"  # O usar un Secret
-    
-    # Lista blanca de IP (nativa BunkerWeb)
-    bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
-    
-    # Bloqueo de User-Agent (nativa BunkerWeb)
-    bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
-    bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider"
-    
-    # Caché (nativa BunkerWeb)
-    bunkerweb.io/USE_CACHING: "yes"
-    bunkerweb.io/CACHING_EXTENSIONS: "jpg jpeg png gif ico css js"
-    bunkerweb.io/CACHING_TIME: "7d"
-    
-    # Límite de conexiones
-    bunkerweb.io/USE_LIMIT_CONN: "yes"
-    bunkerweb.io/LIMIT_CONN_MAX: "10"
-spec:
-  ingressClassName: bunkerweb
-  tls:
-  - hosts:
-    - custom-app.example.com
-    secretName: custom-app-tls
-  rules:
-  - host: custom-app.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: custom-app-service
-            port:
-              number: 80
-```
+    ```yaml title="bunkerweb-ingress.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        # SSL
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+        
+        # Autenticación básica (nativa BunkerWeb)
+        bunkerweb.io/USE_AUTH_BASIC: "yes"
+        bunkerweb.io/AUTH_BASIC_LOCATION: "sitewide" # O "/secure" o "^~ /admin/"
+        bunkerweb.io/AUTH_BASIC_USER: "user"
+        bunkerweb.io/AUTH_BASIC_PASSWORD: "password"  # O usar un Secret
+        bunkerweb.io/AUTH_BASIC_USER_1: "user1"
+        bunkerweb.io/AUTH_BASIC_PASSWORD_1: "otherpassword"  # O usar un Secret
+        bunkerweb.io/AUTH_BASIC_TEXT: "Authentication Required"
+        
+        # Lista blanca de IP (nativa BunkerWeb)
+        bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
+        
+        # Bloqueo de User-Agent (nativa BunkerWeb)
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+        bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # O regex PCRE
+        
+        # Caché (nativa BunkerWeb)
+        bunkerweb.io/USE_CLIENT_CACHE: "yes"
+        bunkerweb.io/CLIENT_CACHE_EXTENSIONS: "jpg|jpeg|png|bmp|ico|svg|tif|css|js|otf|ttf|eot|woff|woff2"
+        bunkerweb.io/CLIENT_CACHE_CONTROL: "public, max-age=15552000" # Valor del encabezado HTTP Cache-Control
+        bunkerweb.io/CLIENT_CACHE_ETAG: "yes" # Habilitar encabezado ETag
+        
+        # Límite de conexiones
+        bunkerweb.io/USE_LIMIT_CONN: "yes"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP1: "10"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP2: "100"
+        bunkerweb.io/LIMIT_CONN_MAX_HTTP3: "100"
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
+    ```
 
-###### Opción B: Uso de ConfigMaps para configuración personalizada
+=== "BunkerWeb Ingress con ConfigMap"
 
-Para reglas sin equivalente directo (reescrituras complejas, proxy externo), usar un ConfigMap:
+    <!-- ###### Opción B: Uso de ConfigMaps para configuración personalizada -->
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: custom-app-ingress
-  namespace: production
-  annotations:
-    bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
-    bunkerweb.io/LETS_ENCRYPT_EMAIL: "admin@example.com"
-    
-    # Funcionalidades nativas
-    bunkerweb.io/USE_AUTH_BASIC: "yes"
-    bunkerweb.io/AUTH_BASIC_USER: "user"
-    bunkerweb.io/AUTH_BASIC_PASSWORD: "password"
-    bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
-    bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
-    bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider"
-spec:
-  ingressClassName: bunkerweb
-  tls:
-  - hosts:
-    - custom-app.example.com
-    secretName: custom-app-tls
-  rules:
-  - host: custom-app.example.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: custom-app-service
-            port:
-              number: 80
+    Para reglas sin equivalentes directos (reescrituras complejas, proxy externo), use un ConfigMap:
 
----
-# ConfigMap para configuración NGINX personalizada
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: custom-app-nginx-config
-  namespace: production
-  annotations:
-    # Indicar que es una configuración HTTP para este sitio
-    bunkerweb.io/CONFIG_TYPE: "http"
-    bunkerweb.io/CONFIG_SITE: "custom-app.example.com"
-data:
-  custom-rules.conf: |
-    # Reescritura personalizada
-    rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
-    
-    # Cabeceras condicionales para APIs
-    location ^~ /api/ {
-      add_header X-API-Gateway "true";
-      proxy_pass http://custom-app-service.production.svc.cluster.local;
-    }
-    
-    # Caché para assets estáticos
-    location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
-      expires 7d;
-      add_header Cache-Control "public, immutable";
-      proxy_pass http://custom-app-service.production.svc.cluster.local;
-    }
-    
-    # Proxy a servicio externo
-    location /external-api {
-      proxy_pass https://external-service.com;
-      proxy_set_header Host external-service.com;
-      proxy_ssl_server_name on;
-    }
-```
+    ```yaml title="bunkerweb-ingress-configmap.yaml"
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: custom-app-ingress
+      namespace: production
+      annotations:
+        bunkerweb.io/AUTO_LETS_ENCRYPT: "yes"
+        bunkerweb.io/EMAIL_LETS_ENCRYPT: "admin@example.com"
+        
+        # Funcionalidades nativas
+        bunkerweb.io/USE_AUTH_BASIC: "yes"
+        bunkerweb.io/AUTH_BASIC_LOCATION: "sitewide" # O "/secure" o "^~ /admin/"
+        bunkerweb.io/AUTH_BASIC_USER: "user"
+        bunkerweb.io/AUTH_BASIC_PASSWORD: "password"  # O usar un Secret
+        bunkerweb.io/AUTH_BASIC_USER_1: "user1"
+        bunkerweb.io/AUTH_BASIC_PASSWORD_1: "otherpassword"  # O usar un Secret
+        bunkerweb.io/AUTH_BASIC_TEXT: "Authentication Required"
+
+        bunkerweb.io/WHITELIST_IP: "10.0.0.0/8 172.16.0.0/12"
+
+        bunkerweb.io/USE_BAD_BEHAVIOR: "yes"
+
+        bunkerweb.io/BLACKLIST_USER_AGENT: "bot crawler spider" # O regex PCRE
+    spec:
+      ingressClassName: bunkerweb
+      tls:
+      - hosts:
+        - custom-app.example.com
+        secretName: custom-app-tls
+      rules:
+      - host: custom-app.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: custom-app-service
+                port:
+                  number: 80
+
+    ---
+    # ConfigMap para configuración NGINX personalizada
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: custom-app-nginx-config
+      namespace: production
+      annotations:
+        # Indicar que es una configuración HTTP para este sitio
+        bunkerweb.io/CONFIG_TYPE: "http"
+        bunkerweb.io/CONFIG_SITE: "custom-app.example.com"
+    data:
+      custom-rules.conf: |
+        # Reescritura personalizada
+        rewrite ^/old-path/(.*)$ /new-path/$1 permanent;
+        
+        # Cabeceras condicionales para APIs
+        location ^~ /api/ {
+          add_header X-API-Gateway "true";
+          proxy_pass http://custom-app-service.production.svc.cluster.local;
+        }
+        
+        # Caché para assets estáticos
+        location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+          expires 7d;
+          add_header Cache-Control "public, immutable";
+          proxy_pass http://custom-app-service.production.svc.cluster.local;
+        }
+        
+        # Proxy a servicio externo
+        location /external-api {
+          proxy_pass https://external-service.com;
+          proxy_set_header Host external-service.com;
+          proxy_ssl_server_name on;
+        }
+    ```
 
 ##### Comparación: Funcionalidades nativas vs ConfigMap
 
@@ -4077,7 +4097,7 @@ data:
 | `auth-type: basic` | ✅ Anotación nativa: `USE_AUTH_BASIC` |
 | `whitelist-source-range` | ✅ Anotación nativa: `WHITELIST_IP` |
 | `if ($http_user_agent ~*)` | ✅ Anotación nativa: `BLACKLIST_USER_AGENT` |
-| `expires 7d` para caché | ✅ Anotación nativa: `USE_CACHING` |
+| `expires 7d` para caché | ✅ Anotación nativa: `USE_CLIENT_CACHE` |
 | `limit_conn addr 10` | ✅ Anotación nativa: `USE_LIMIT_CONN` |
 | `rewrite` complejo | ⚠️ ConfigMap: `CONFIG_TYPE: http` |
 | `location` personalizada | ⚠️ ConfigMap: `CONFIG_TYPE: http` |
@@ -4090,7 +4110,7 @@ data:
 | Métrica | NGINX Ingress | BunkerWeb | Comentario |
 |----------|---------------|-----------|-------------|
 | Tiempo de respuesta promedio | 45ms | 52ms | +7ms (sobrecarga de seguridad aceptable) |
-| Solicitudes bloqueadas (XSS/SQLi) | 0 (sin WAF) | 127 | WAF activo ✅ |
+| Solicitudes bloqueadas (XSS/SQLi) | 0 | **127** | WAF activo ✅ |
 | Certificado SSL | Válido | Válido | Migración OK ✅ |
 | Disponibilidad | 99.9% | 99.9% | Estable ✅ |
 
