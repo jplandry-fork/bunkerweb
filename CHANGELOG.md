@@ -4,6 +4,7 @@
 
 - [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs
 - [UI] Change redirect status code from 302 to 303 in the web UI to follow best practices for redirection after form submissions
+- [UI] Fix bug where updating a ban to a custom duration accidentally created a permanent ban
 - [MISC] Deprecate Laurent Minne's blacklist given the upcoming changes
 
 ## v1.6.8~rc2 - 2026/01/23
