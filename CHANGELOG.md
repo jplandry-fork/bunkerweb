@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.6.8~rc3 - 2026/01/??
+## v1.6.8~rc3 - 2026/01/30
 
 - [FEATURE] Add new `REVERSE_PROXY_REQUEST_BUFFERING` setting to the `Reverse Proxy` plugin to control request body buffering behavior when proxying requests (default: `on`)
 - [BUGFIX] Initialize is_whitelisted variable to 'no' in configuration files to avoid spam uninitialized messages in logs
@@ -11,6 +11,7 @@
 - [UI] Enhance map legend and color ramp for blocked requests visualization
 - [UI] Enhance dark mode styles for news card elements
 - [MISC] Update Laurent Minne's blacklist's label and add the new one from [DuggyTuxy Data-Shield IPv4 Blocklist](https://duggytuxy.github.io/)
+- [MISC] Add publiccode metadata file for open source compliance
 
 ## v1.6.8~rc2 - 2026/01/23
 
