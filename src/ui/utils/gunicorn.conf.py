@@ -1,7 +1,7 @@
 from datetime import datetime
 from hashlib import sha256
 from json import JSONDecodeError, dump, dumps, loads
-from os import cpu_count, environ, getenv, sep
+from os import environ, getenv, sep
 from os.path import join
 from pathlib import Path
 from secrets import token_hex
@@ -18,7 +18,7 @@ for deps_path in [join(sep, "usr", "share", "bunkerweb", *paths) for paths in ((
 from biscuit_auth import KeyPair, PublicKey, PrivateKey
 from passlib.totp import generate_secret
 
-from common_utils import handle_docker_secrets  # type: ignore
+from common_utils import effective_cpu_count, handle_docker_secrets  # type: ignore
 from logger import getLogger, log_types  # type: ignore
 
 from app.models.ui_database import UIDatabase
@@ -48,11 +48,15 @@ TOTP_HASH_FILE = TOTP_SECRETS_FILE.with_suffix(".hash")  # File to store hash of
 BISCUIT_PUBLIC_KEY_HASH_FILE = BISCUIT_PUBLIC_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit public key
 BISCUIT_PRIVATE_KEY_HASH_FILE = BISCUIT_PRIVATE_KEY_FILE.with_suffix(".hash")  # File to store hash of Biscuit private key
 
-MAX_WORKERS = int(getenv("MAX_WORKERS", max((cpu_count() or 1) - 1, 1)))
+MAX_WORKERS = int(getenv("MAX_WORKERS", max(effective_cpu_count() - 1, 1)))
 LOG_LEVEL = getenv("CUSTOM_LOG_LEVEL", getenv("LOG_LEVEL", "info"))
 LISTEN_ADDR = getenv("UI_LISTEN_ADDR", getenv("LISTEN_ADDR", "0.0.0.0"))
 LISTEN_PORT = getenv("UI_LISTEN_PORT", getenv("LISTEN_PORT", "7000"))
-FORWARDED_ALLOW_IPS = getenv("UI_FORWARDED_ALLOW_IPS", getenv("FORWARDED_ALLOW_IPS", "*"))
+FORWARDED_ALLOW_IPS = getenv(
+    "UI_FORWARDED_ALLOW_IPS",
+    getenv("FORWARDED_ALLOW_IPS", "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"),
+)
+PROXY_ALLOW_IPS = getenv("UI_PROXY_ALLOW_IPS", getenv("PROXY_ALLOW_IPS", FORWARDED_ALLOW_IPS))
 """
 TLS/SSL support
 
@@ -93,10 +97,14 @@ umask = 0x027
 pidfile = PID_FILE.as_posix()
 worker_tmp_dir = join(sep, "dev", "shm")
 tmp_upload_dir = TMP_UI_DIR.as_posix()
-secure_scheme_headers = {}
+secure_scheme_headers = {
+    "X-FORWARDED-PROTOCOL": "https",
+    "X-FORWARDED-PROTO": "https",
+    "X-FORWARDED-SSL": "on",
+}
 forwarded_allow_ips = FORWARDED_ALLOW_IPS
 pythonpath = join(sep, "usr", "share", "bunkerweb", "deps", "python") + "," + join(sep, "usr", "share", "bunkerweb", "ui")
-proxy_allow_ips = "*"
+proxy_allow_ips = PROXY_ALLOW_IPS
 casefold_http_method = True
 workers = MAX_WORKERS
 bind = f"{LISTEN_ADDR}:{LISTEN_PORT}"
@@ -104,6 +112,7 @@ worker_class = "gthread"
 threads = int(getenv("MAX_THREADS", MAX_WORKERS * 2))
 max_requests_jitter = min(8, MAX_WORKERS)
 graceful_timeout = 30
+http_protocols = "h1"  # TODO: add h2 when fixed and h3 when supported
 
 DEBUG = getenv("DEBUG", False)
 
